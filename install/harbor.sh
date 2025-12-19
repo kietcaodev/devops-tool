@@ -100,8 +100,11 @@ install_harbor() {
     
     cd $HARBOR_HOME/harbor
     
-    # Install with Trivy scanner and Chartmuseum
-    ./install.sh --with-trivy --with-chartmuseum
+    # Prepare Harbor (generate config files)
+    ./prepare --with-trivy
+    
+    # Install with Trivy scanner
+    ./install.sh --with-trivy
     
     echo -e "${GREEN}✓ Harbor installed${NC}"
 }

@@ -338,7 +338,7 @@ services:
     container_name: cadvisor
     restart: always
     ports:
-      - '8080:8080'
+      - '8888:8080'  # Changed from 8080 to 8888 to avoid Jenkins conflict
     volumes:
       - '/:/rootfs:ro'
       - '/var/run:/var/run:ro'
@@ -380,7 +380,7 @@ display_info() {
     echo -e "  Grafana:         ${YELLOW}http://localhost:${GRAFANA_PORT}${NC}"
     echo -e "  AlertManager:    ${YELLOW}http://localhost:${ALERTMANAGER_PORT}${NC}"
     echo -e "  Node Exporter:   ${YELLOW}http://localhost:${NODE_EXPORTER_PORT}${NC}"
-    echo -e "  cAdvisor:        ${YELLOW}http://localhost:8080${NC}"
+    echo -e "  cAdvisor:        ${YELLOW}http://localhost:8888${NC}"
     
     echo -e "\n${BLUE}Grafana Login:${NC}"
     echo -e "  Username: ${YELLOW}admin${NC}"
