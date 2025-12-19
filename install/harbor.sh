@@ -18,6 +18,7 @@ NC='\033[0m'
 HARBOR_HOME="/srv/harbor"
 HARBOR_VERSION="v2.10.0"
 HARBOR_HOSTNAME="${HARBOR_HOSTNAME:-harbor.local}"
+HARBOR_PORT="${HARBOR_PORT:-8090}"
 HARBOR_ADMIN_PASSWORD="${HARBOR_ADMIN_PASSWORD:-Harbor12345}"
 
 echo -e "${GREEN}=====================================${NC}"
@@ -86,6 +87,9 @@ configure_harbor() {
     # Update configuration
     sed -i "s/hostname: .*/hostname: ${HARBOR_HOSTNAME}/" harbor.yml
     sed -i "s/harbor_admin_password: .*/harbor_admin_password: ${HARBOR_ADMIN_PASSWORD}/" harbor.yml
+    
+    # Change HTTP port to avoid conflict with GitLab
+    sed -i "s/port: 80/port: ${HARBOR_PORT}/" harbor.yml
     
     # Disable HTTPS for initial setup (can be enabled later with SSL)
     sed -i '/^https:/,/^$/s/^/#/' harbor.yml
@@ -173,7 +177,7 @@ configure_docker_client() {
     mkdir -p /etc/docker
     cat > /etc/docker/daemon.json <<EOF
 {
-  "insecure-registries": ["${HARBOR_HOSTNAME}"]
+  "insecure-registries": ["${HARBOR_HOSTNAME}:${HARBOR_PORT}"]
 }
 EOF
     
@@ -186,7 +190,7 @@ EOF
 display_info() {
     echo -e "\n${GREEN}=====================================${NC}"
     echo -e "${GREEN}Harbor Installation Completed!${NC}"
-    echo -e "${GREEN}=====================================${NC}"
+    echo -e "${GREEN}=================================:${HARBOR_PORT}====${NC}"
     
     echo -e "\n${BLUE}Access Information:${NC}"
     echo -e "  URL: ${YELLOW}http://${HARBOR_HOSTNAME}${NC}"
@@ -203,13 +207,13 @@ display_info() {
     echo -e "  Check status:    ${YELLOW}cd $HARBOR_HOME/harbor && docker compose ps${NC}"
     
     echo -e "\n${BLUE}Docker Login:${NC}"
-    echo -e "  ${YELLOW}docker login ${HARBOR_HOSTNAME}${NC}"
+    echo -e "  ${YELLOW}docker login ${HARBOR_HOSTNAME}:${HARBOR_PORT}${NC}"
     echo -e "  Username: admin"
     echo -e "  Password: ${HARBOR_ADMIN_PASSWORD}"
     
     echo -e "\n${BLUE}Push Image Example:${NC}"
-    echo -e "  ${YELLOW}docker tag myimage:latest ${HARBOR_HOSTNAME}/library/myimage:latest${NC}"
-    echo -e "  ${YELLOW}docker push ${HARBOR_HOSTNAME}/library/myimage:latest${NC}"
+    echo -e "  ${YELLOW}docker tag myimage:latest ${HARBOR_HOSTNAME}:${HARBOR_PORT}/library/myimage:latest${NC}"
+    echo -e "  ${YELLOW}docker push ${HARBOR_HOSTNAME}:${HARBOR_PORT}/library/myimage:latest${NC}"
     
     echo -e "\n${YELLOW}Note: If you want to use HTTPS:${NC}"
     echo -e "  1. Get SSL certificates (Let's Encrypt)"

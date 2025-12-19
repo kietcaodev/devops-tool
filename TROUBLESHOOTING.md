@@ -62,6 +62,7 @@ sudo ss -tulpn | grep LISTEN
 | Jenkins | 8080 | 8080 | ✓ OK |
 | SonarQube | 9000 | 9000 | ✓ OK |
 | Nexus | 8081 | 8081 | ✓ OK |
+| Harbor HTTP | 80 | **8090** | GitLab conflict |
 | cAdvisor | 8080 | **8888** | Jenkins conflict |
 | Prometheus | 9090 | 9090 | ✓ OK |
 | Grafana | 3000 | 3000 | ✓ OK |
