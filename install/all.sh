@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ###############################################################################
-# Master Installation Script - Install All DevOps Tools
-# Cài đặt toàn bộ stack: GitLab, Jenkins, SonarQube, Nexus, Harbor, Monitoring
+# Master Installation Script - Essential DevOps Tools
+# Cài đặt stack thiết yếu: GitLab, Jenkins, SonarQube
 ###############################################################################
 
 set -e
@@ -18,8 +18,8 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo -e "${MAGENTA}╔════════════════════════════════════════╗${NC}"
-echo -e "${MAGENTA}║  DevOps Infrastructure Setup          ║${NC}"
-echo -e "${MAGENTA}║  Complete Stack Installation           ║${NC}"
+echo -e "${MAGENTA}║  Essential DevOps Stack Setup         ║${NC}"
+echo -e "${MAGENTA}║  GitLab + Jenkins + SonarQube          ║${NC}"
 echo -e "${MAGENTA}╚════════════════════════════════════════╝${NC}"
 
 # Check if running as root
@@ -34,14 +34,11 @@ show_menu() {
     echo -e "${GREEN}What do you want to install?${NC}"
     echo -e "${BLUE}═══════════════════════════════════════${NC}"
     echo ""
-    echo -e "  ${YELLOW}1)${NC} GitLab CE (Source Control & CI/CD)"
-    echo -e "  ${YELLOW}2)${NC} Jenkins (Automation Server)"
-    echo -e "  ${YELLOW}3)${NC} SonarQube (Code Quality)"
-    echo -e "  ${YELLOW}4)${NC} Nexus Repository (Artifact Manager)"
-    echo -e "  ${YELLOW}5)${NC} Harbor (Container Registry)"
-    echo -e "  ${YELLOW}6)${NC} Monitoring Stack (Prometheus + Grafana)"
+    echo -e "  ${YELLOW}1)${NC} GitLab CE (Source Control & CI/CD) - 4GB RAM"
+    echo -e "  ${YELLOW}2)${NC} Jenkins (Automation Server) - 2GB RAM"
+    echo -e "  ${YELLOW}3)${NC} SonarQube (Code Quality) - 2GB RAM"
     echo ""
-    echo -e "  ${GREEN}7)${NC} Install ALL (Complete Stack)"
+    echo -e "  ${GREEN}4)${NC} Install ALL (Essential Stack) - 8GB RAM"
     echo ""
     echo -e "  ${RED}0)${NC} Exit"
     echo ""
@@ -129,63 +126,19 @@ install_sonarqube() {
     fi
 }
 
-# Install Nexus
-install_nexus() {
-    echo -e "\n${MAGENTA}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}Installing Nexus Repository...${NC}"
-    echo -e "${MAGENTA}═══════════════════════════════════════${NC}"
-    
-    if [ -f "$SCRIPT_DIR/nexus.sh" ]; then
-        bash "$SCRIPT_DIR/nexus.sh"
-    else
-        echo -e "${RED}Error: nexus.sh not found${NC}"
-        return 1
-    fi
-}
-
-# Install Harbor
-install_harbor() {
-    echo -e "\n${MAGENTA}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}Installing Harbor...${NC}"
-    echo -e "${MAGENTA}═══════════════════════════════════════${NC}"
-    
-    if [ -f "$SCRIPT_DIR/harbor.sh" ]; then
-        bash "$SCRIPT_DIR/harbor.sh"
-    else
-        echo -e "${RED}Error: harbor.sh not found${NC}"
-        return 1
-    fi
-}
-
-# Install Monitoring
-install_monitoring() {
-    echo -e "\n${MAGENTA}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}Installing Monitoring Stack...${NC}"
-    echo -e "${MAGENTA}═══════════════════════════════════════${NC}"
-    
-    if [ -f "$SCRIPT_DIR/monitoring.sh" ]; then
-        bash "$SCRIPT_DIR/monitoring.sh"
-    else
-        echo -e "${RED}Error: monitoring.sh not found${NC}"
-        return 1
-    fi
-}
-
 # Install all
 install_all() {
     echo -e "\n${MAGENTA}╔════════════════════════════════════════╗${NC}"
-    echo -e "${MAGENTA}║  Installing Complete DevOps Stack     ║${NC}"
+    echo -e "${MAGENTA}║  Installing Essential DevOps Stack    ║${NC}"
     echo -e "${MAGENTA}╚════════════════════════════════════════╝${NC}"
     
     echo -e "\n${YELLOW}This will install:${NC}"
-    echo -e "  • GitLab CE"
-    echo -e "  • Jenkins"
-    echo -e "  • SonarQube"
-    echo -e "  • Nexus Repository"
-    echo -e "  • Harbor Registry"
-    echo -e "  • Monitoring Stack (Prometheus + Grafana)"
+    echo -e "  • GitLab CE (4GB RAM)"
+    echo -e "  • Jenkins (2GB RAM)"
+    echo -e "  • SonarQube (2GB RAM)"
+    echo -e "\n${BLUE}Total RAM needed: ~8GB${NC}"
     echo ""
-    echo -e "${RED}This may take 30-60 minutes depending on your system${NC}"
+    echo -e "${RED}This may take 20-30 minutes depending on your system${NC}"
     echo ""
     read -p "Continue? (yes/no): " CONFIRM
     
@@ -197,11 +150,14 @@ install_all() {
     START_TIME=$(date +%s)
     
     install_gitlab || echo -e "${YELLOW}GitLab installation had issues${NC}"
+    echo -e "\n${BLUE}Waiting 30s for GitLab to stabilize...${NC}"
+    sleep 30
+    
     install_jenkins || echo -e "${YELLOW}Jenkins installation had issues${NC}"
+    echo -e "\n${BLUE}Waiting 30s for Jenkins to stabilize...${NC}"
+    sleep 30
+    
     install_sonarqube || echo -e "${YELLOW}SonarQube installation had issues${NC}"
-    install_nexus || echo -e "${YELLOW}Nexus installation had issues${NC}"
-    install_harbor || echo -e "${YELLOW}Harbor installation had issues${NC}"
-    install_monitoring || echo -e "${YELLOW}Monitoring installation had issues${NC}"
     
     END_TIME=$(date +%s)
     DURATION=$((END_TIME - START_TIME))
@@ -217,32 +173,36 @@ install_all() {
 # Display final summary
 display_final_summary() {
     echo -e "\n${BLUE}═══════════════════════════════════════${NC}"
-    echo -e "${GREEN}DevOps Stack Summary${NC}"
+    echo -e "${GREEN}Essential DevOps Stack Summary${NC}"
     echo -e "${BLUE}═══════════════════════════════════════${NC}"
     
     echo -e "\n${YELLOW}Access URLs:${NC}"
     echo -e "  GitLab:       http://localhost (SSH: port 2222)"
     echo -e "  Jenkins:      http://localhost:8080"
     echo -e "  SonarQube:    http://localhost:9000"
-    echo -e "  Nexus:        http://localhost:8081"
-    echo -e "  Harbor:       http://harbor.local:8090"
-    echo -e "  Prometheus:   http://localhost:9090"
-    echo -e "  Grafana:      http://localhost:3000"
-    echo -e "  cAdvisor:     http://localhost:8888"
+    
+    echo -e "\n${YELLOW}Default Credentials:${NC}"
+    echo -e "  GitLab:     root / (set on first login)"
+    echo -e "  Jenkins:    admin / (check: docker logs jenkins)"
+    echo -e "  SonarQube:  admin / admin"
     
     echo -e "\n${YELLOW}Status Check:${NC}"
     echo -e "  ${BLUE}docker ps${NC} - View running containers"
+    echo -e "  ${BLUE}docker stats${NC} - Check resource usage"
     
     echo -e "\n${YELLOW}Data Locations:${NC}"
     echo -e "  /srv/gitlab"
     echo -e "  /srv/jenkins"
     echo -e "  /srv/sonarqube"
-    echo -e "  /srv/nexus"
-    echo -e "  /srv/harbor"
-    echo -e "  /srv/monitoring"
+    
+    echo -e "\n${YELLOW}Next Steps:${NC}"
+    echo -e "  1. Wait 2-3 minutes for all services to start"
+    echo -e "  2. Access GitLab and set root password"
+    echo -e "  3. Get Jenkins initial admin password"
+    echo -e "  4. Login to SonarQube and change password"
     
     echo -e "\n${YELLOW}Documentation:${NC}"
-    echo -e "  Check README.md for detailed instructions"
+    echo -e "  Check README.md and QUICKSTART.md"
     
     echo -e "\n${GREEN}Happy DevOps! 🚀${NC}"
 }
@@ -269,18 +229,6 @@ main() {
                 read -p "Press Enter to continue..."
                 ;;
             4)
-                install_nexus
-                read -p "Press Enter to continue..."
-                ;;
-            5)
-                install_harbor
-                read -p "Press Enter to continue..."
-                ;;
-            6)
-                install_monitoring
-                read -p "Press Enter to continue..."
-                ;;
-            7)
                 install_all
                 read -p "Press Enter to continue..."
                 ;;

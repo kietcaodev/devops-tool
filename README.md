@@ -2,27 +2,46 @@
 
 Bộ script tự động cài đặt và cấu hình các tool DevOps chuẩn trên Debian 12.
 
+## ⚠️ QUAN TRỌNG - Yêu cầu hệ thống
+
+**Nếu server của bạn có ít RAM, hãy đọc kỹ phần này trước khi cài đặt!**
+
+### Yêu cầu tối thiểu:
+- **RAM**: 8GB (chỉ cài services thiết yếu)
+- **CPU**: 4 cores
+- **Disk**: 50GB free space
+- **OS**: Debian 12 (Bookworm)
+
+### Yêu cầu đầy đủ (full stack):
+- **RAM**: 16GB+ 
+- **CPU**: 8+ cores
+- **Disk**: 100GB+ free space
+
+### ⚡ Nếu RAM < 16GB:
+1. **Tạo swap ngay**: `sudo ./utils/create-swap.sh` (chọn 8GB)
+2. **Cài từng service một**: Dùng `./install/lightweight.sh` hoặc `./install/staggered.sh`
+3. **KHÔNG dùng** `./install/all.sh` (sẽ crash server!)
+
 ## 🎯 Các Tool Được Hỗ Trợ
 
-- **GitLab CE** - Source control & CI/CD platform
-- **Jenkins** - Automation server với Blue Ocean
-- **SonarQube** - Code quality & security analysis
-- **Nexus Repository** - Artifact repository manager
-- **Harbor** - Docker/Container registry
-- **Prometheus + Grafana** - Monitoring & visualization
-- **GitLab Runner** - CI/CD executor
-- **PostgreSQL** - Database cho các services
+- **GitLab CE** - Source control & CI/CD platform (~4GB RAM)
+- **Jenkins** - Automation server với Blue Ocean (~2GB RAM)
+- **SonarQube** - Code quality & security analysis (~2GB RAM)
+- **Nexus Repository** - Artifact repository manager (~2GB RAM)
+- **Harbor** - Docker/Container registry (~2GB RAM)
+- **Prometheus + Grafana** - Monitoring & visualization (~2GB RAM)
+
+**Tổng RAM cần thiết**: ~14-16GB khi chạy tất cả services
 
 ## 🚀 Tính năng
 
 - ✅ Cài đặt tự động từng tool hoặc toàn bộ stack
-- ✅ Cấu hình SSL/TLS với Let's Encrypt
+- ✅ Kiểm tra tài nguyên trước khi cài
+- ✅ Lightweight mode cho server RAM thấp
+- ✅ Staggered installation tránh overload
 - ✅ Backup và restore tự động
-- ✅ High availability setup
-- ✅ Security hardening
-- ✅ Resource optimization cho Debian 12
 - ✅ Docker-based deployment
-- ✅ Monitoring và alerting tích hợp
+- ✅ Resource monitoring và alerting
 
 ## 📁 Cấu trúc Project
 
@@ -61,52 +80,67 @@ devops-tool/
     └── cleanup.sh      # Cleanup unused resources
 ```
 
-## 🔧 Yêu cầu hệ thống
+## � Cài đặt
 
-- **OS**: Debian 12 (Bookworm)
-- **RAM**: 
-  - GitLab: 4GB minimum, 8GB recommended
-  - Jenkins: 2GB minimum, 4GB recommended
-  - SonarQube: 2GB minimum, 4GB recommended
-  - Full Stack: 16GB+ recommended
-- **Disk**: 50GB+ free space
-- **CPU**: 4+ cores recommended
-- **Internet**: Để download Docker images
+### Bước 1: Kiểm tra tài nguyên hệ thống
 
-## 📦 Cài đặt nhanh
-
-### Cài đặt từng tool riêng lẻ
+**LUÔN CHẠY LỆNH NÀY TRƯỚC TIÊN!**
 
 ```bash
-# GitLab
-sudo chmod +x install/gitlab.sh
-sudo ./install/gitlab.sh
-
-# Jenkins
-sudo chmod +x install/jenkins.sh
-sudo ./install/jenkins.sh
-
-# SonarQube
-sudo chmod +x install/sonarqube.sh
-sudo ./install/sonarqube.sh
-
-# Nexus
-sudo chmod +x install/nexus.sh
-sudo ./install/nexus.sh
-
-# Harbor
-sudo chmod +x install/harbor.sh
-sudo ./install/harbor.sh
-
-# Monitoring Stack (Prometheus + Grafana)
-sudo chmod +x install/monitoring.sh
-sudo ./install/monitoring.sh
+cd devops-tool
+chmod +x utils/check-resources.sh
+sudo ./utils/check-resources.sh
 ```
 
-### Cài đặt toàn bộ stack
+Script này sẽ:
+- Kiểm tra RAM, CPU, Disk
+- Đưa ra khuyến nghị cài đặt
+- Cảnh báo nếu thiếu tài nguyên
+
+### Bước 2: Tạo Swap (nếu RAM < 16GB)
 
 ```bash
-sudo chmod +x install/all.sh
+chmod +x utils/create-swap.sh
+sudo ./utils/create-swap.sh
+# Chọn option 2 (8GB swap)
+```
+
+### Bước 3: Chọn phương thức cài đặt
+
+#### A. Server có 16GB+ RAM → Cài đầy đủ
+
+```bash
+chmod +x install/staggered.sh
+sudo ./install/staggered.sh
+```
+
+Cài tất cả services với delays giữa mỗi service để tránh overload.
+
+#### B. Server có 8-16GB RAM → Cài nhẹ
+
+```bash
+chmod +x install/lightweight.sh
+sudo ./install/lightweight.sh
+```
+
+Chỉ cài services thiết yếu: GitLab + Jenkins + SonarQube
+
+#### C. Server có < 8GB RAM → Cài từng service
+
+```bash
+# Chỉ cài service quan trọng nhất trước
+chmod +x install/gitlab.sh
+sudo ./install/gitlab.sh
+
+# Đợi GitLab ổn định rồi mới cài tiếp
+chmod +x install/jenkins.sh
+sudo ./install/jenkins.sh
+```
+
+### ⚠️ KHÔNG nên dùng (trừ khi có 16GB+ RAM):
+
+```bash
+# ❌ CẢNH BÁO: Sẽ crash server nếu RAM thấp!
 sudo ./install/all.sh
 ```
 
