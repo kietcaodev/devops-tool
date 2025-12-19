@@ -133,7 +133,7 @@ sudo ./install/all.sh
 - Password: Xem trong `/srv/nexus/data/admin.password`
 
 ### Harbor
-- URL: https://localhost
+- URL: http://harbor.local:8090
 - Username: `admin`
 - Password: Xem trong output của script
 
@@ -156,7 +156,7 @@ sudo ./utils/ssl-setup.sh yourdomain.com
 # GitLab
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
-sudo ufw allow 22/tcp
+sudo ufw allow 2222/tcp  # GitLab SSH
 
 # Jenkins
 sudo ufw allow 8080/tcp
@@ -166,6 +166,13 @@ sudo ufw allow 9000/tcp
 
 # Nexus
 sudo ufw allow 8081/tcp
+
+# Harbor
+sudo ufw allow 8090/tcp
+
+# Monitoring
+sudo ufw allow 3000/tcp  # Grafana
+sudo ufw allow 9090/tcp  # Prometheus
 ```
 
 ## 💾 Backup & Restore

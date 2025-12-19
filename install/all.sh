@@ -221,13 +221,14 @@ display_final_summary() {
     echo -e "${BLUE}═══════════════════════════════════════${NC}"
     
     echo -e "\n${YELLOW}Access URLs:${NC}"
-    echo -e "  GitLab:       http://localhost"
+    echo -e "  GitLab:       http://localhost (SSH: port 2222)"
     echo -e "  Jenkins:      http://localhost:8080"
     echo -e "  SonarQube:    http://localhost:9000"
     echo -e "  Nexus:        http://localhost:8081"
-    echo -e "  Harbor:       http://harbor.local"
+    echo -e "  Harbor:       http://harbor.local:8090"
     echo -e "  Prometheus:   http://localhost:9090"
     echo -e "  Grafana:      http://localhost:3000"
+    echo -e "  cAdvisor:     http://localhost:8888"
     
     echo -e "\n${YELLOW}Status Check:${NC}"
     echo -e "  ${BLUE}docker ps${NC} - View running containers"

@@ -69,6 +69,7 @@ docker compose restart
 
 ### GitLab
 - URL: http://localhost
+- SSH: port 2222
 - Username: `root`
 - Password: Xem output script
 
@@ -88,7 +89,7 @@ docker compose restart
 - Password: Trong file `/srv/nexus/data/admin.password`
 
 ### Harbor
-- URL: http://harbor.local
+- URL: http://harbor.local:8090
 - Username: `admin`
 - Password: Xem output script
 
