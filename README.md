@@ -1,83 +1,60 @@
-# DevOps Infrastructure Automation
+# DevOps Essential Stack
 
-Bộ script tự động cài đặt và cấu hình các tool DevOps chuẩn trên Debian 12.
+Bộ script tự động cài đặt 3 tool DevOps thiết yếu trên Debian 12: **GitLab + Jenkins + SonarQube**
 
-## ⚠️ QUAN TRỌNG - Yêu cầu hệ thống
+## 🎯 Các Tool
 
-**Nếu server của bạn có ít RAM, hãy đọc kỹ phần này trước khi cài đặt!**
+| Tool | Mục đích | RAM | Port |
+|------|----------|-----|------|
+| **GitLab CE** | Source control & CI/CD | ~4GB | 80, 2222 |
+| **Jenkins** | Automation server | ~2GB | 8080 |
+| **SonarQube** | Code quality & security | ~2GB | 9000 |
 
-### Yêu cầu tối thiểu:
-- **RAM**: 8GB (chỉ cài services thiết yếu)
+**Tổng RAM cần thiết**: ~8GB
+
+## ⚠️ Yêu cầu hệ thống
+
+### Tối thiểu:
+- **RAM**: 8GB
 - **CPU**: 4 cores
-- **Disk**: 50GB free space
+- **Disk**: 40GB free space
 - **OS**: Debian 12 (Bookworm)
 
-### Yêu cầu đầy đủ (full stack):
-- **RAM**: 16GB+ 
-- **CPU**: 8+ cores
-- **Disk**: 100GB+ free space
+### Khuyến nghị:
+- **RAM**: 12GB+ (8GB services + 4GB hệ thống)
+- **CPU**: 4+ cores
+- **Disk**: 50GB+ free space
 
-### ⚡ Nếu RAM < 16GB:
-1. **Tạo swap ngay**: `sudo ./utils/create-swap.sh` (chọn 8GB)
-2. **Cài từng service một**: Dùng `./install/lightweight.sh` hoặc `./install/staggered.sh`
-3. **KHÔNG dùng** `./install/all.sh` (sẽ crash server!)
-
-## 🎯 Các Tool Được Hỗ Trợ
-
-- **GitLab CE** - Source control & CI/CD platform (~4GB RAM)
-- **Jenkins** - Automation server với Blue Ocean (~2GB RAM)
-- **SonarQube** - Code quality & security analysis (~2GB RAM)
-- **Nexus Repository** - Artifact repository manager (~2GB RAM)
-- **Harbor** - Docker/Container registry (~2GB RAM)
-- **Prometheus + Grafana** - Monitoring & visualization (~2GB RAM)
-
-**Tổng RAM cần thiết**: ~14-16GB khi chạy tất cả services
+### ⚡ Nếu RAM < 12GB:
+Tạo swap 4-8GB để tránh OOM:
+```bash
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
 
 ## 🚀 Tính năng
 
-- ✅ Cài đặt tự động từng tool hoặc toàn bộ stack
-- ✅ Kiểm tra tài nguyên trước khi cài
-- ✅ Lightweight mode cho server RAM thấp
-- ✅ Staggered installation tránh overload
-- ✅ Backup và restore tự động
+- ✅ Cài đặt tự động từng tool hoặc cả 3
 - ✅ Docker-based deployment
-- ✅ Resource monitoring và alerting
+- ✅ Tự động backup hàng ngày
+- ✅ Cấu hình tối ưu cho Debian 12
+- ✅ Script đơn giản, dễ customize
 
 ## 📁 Cấu trúc Project
 
 ```
 devops-tool/
-├── install/              # Installation scripts
-│   ├── gitlab.sh        # Cài đặt GitLab CE
-│   ├── jenkins.sh       # Cài đặt Jenkins
-│   ├── sonarqube.sh     # Cài đặt SonarQube
-│   ├── nexus.sh         # Cài đặt Nexus Repository
-│   ├── harbor.sh        # Cài đặt Harbor Registry
-│   ├── monitoring.sh    # Cài đặt Prometheus + Grafana
-│   └── all.sh           # Cài đặt toàn bộ stack
-├── configs/             # Configuration templates
-│   ├── gitlab/         # GitLab configs
-│   ├── jenkins/        # Jenkins configs
-│   ├── sonarqube/      # SonarQube configs
-│   ├── nexus/          # Nexus configs
-│   ├── harbor/         # Harbor configs
-│   └── monitoring/     # Monitoring configs
-├── docker/              # Docker compose files
-│   ├── gitlab/
-│   ├── jenkins/
-│   ├── sonarqube/
-│   ├── nexus/
-│   ├── harbor/
-│   └── monitoring/
-├── backup/              # Backup scripts
-│   ├── backup-gitlab.sh
-│   ├── backup-jenkins.sh
-│   ├── backup-sonar.sh
-│   └── restore.sh
-└── utils/               # Utility scripts
-    ├── ssl-setup.sh    # Setup SSL certificates
-    ├── health-check.sh # Health monitoring
-    └── cleanup.sh      # Cleanup unused resources
+├── README.md           # Tài liệu này
+├── QUICKSTART.md       # Hướng dẫn nhanh
+├── TOOLS.md            # Chi tiết về từng tool
+└── install/            # Installation scripts
+    ├── all.sh          # Menu cài đặt (khuyến nghị)
+    ├── gitlab.sh       # Cài riêng GitLab
+    ├── jenkins.sh      # Cài riêng Jenkins
+    └── sonarqube.sh    # Cài riêng SonarQube
 ```
 
 ## � Cài đặt
@@ -167,29 +144,20 @@ sudo ./install/all.sh
 - Password: Xem trong `/srv/nexus/data/admin.password`
 
 ### Harbor
-- URL: http://harbor.local:8090
-- Username: `admin`
-- Password: Xem trong output của script
+- U🔐 Access & Credentials
 
-### Grafana
-- URL: http://localhost:3000
-- Username: `admin`
-- Password: `admin`
+### GitLab
+- **URL**: http://localhost hoặc http://YOUR_SERVER_IP
+- **SSH Port**: 2222 (thay vì 22)
+- **Username**: `root`
+- **Password**: Đặt khi lần đầu truy cập
 
-## 🔐 Security
-
-### SSL/TLS Setup
-
-```bash
-sudo ./utils/ssl-setup.sh yourdomain.com
-```
-
-### Firewall Configuration
+**Clone repo với SSH:**
+```basFirewall Configuration
 
 ```bash
 # GitLab
 sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
 sudo ufw allow 2222/tcp  # GitLab SSH
 
 # Jenkins
@@ -198,62 +166,36 @@ sudo ufw allow 8080/tcp
 # SonarQube
 sudo ufw allow 9000/tcp
 
-# Nexus
-sudo ufw allow 8081/tcp
-
-# Harbor
-sudo ufw allow 8090/tcp
-
-# Monitoring
-sudo ufw allow 3000/tcp  # Grafana
-sudo ufw allow 9090/tcp  # Prometheus
+# Enable firewall
+sudo ufw enable
 ```
 
-## 💾 Backup & Restore
+## 💾 Backup
 
-### Backup tất cả services
+Tất cả services đã được cấu hình backup tự động:
 
+### GitLab
+- **Backup location**: `/srv/gitlab/backups`
+- **Schedule**: Hàng ngày lúc 2:00 AM
+- **Manual backup**:
 ```bash
-sudo ./backup/backup-all.sh
+docker exec -t gitlab gitlab-backup create
 ```
 
-### Backup riêng từng service
-
+### Jenkins
+- **Backup location**: `/srv/jenkins/backups`
+- **Schedule**: Hàng ngày lúc 3:00 AM
+- **Manual backup**:
 ```bash
-sudo ./backup/backup-gitlab.sh
-sudo ./backup/backup-jenkins.sh
-sudo ./backup/backup-sonar.sh
+tar -czf jenkins-backup-$(date +%Y%m%d).tar.gz /srv/jenkins/data
 ```
 
-### Restore
-
+### SonarQube
+- **Backup location**: `/srv/sonarqube/backups`
+- **Schedule**: Hàng ngày lúc 4:00 AM
+- **Manual backup**:
 ```bash
-sudo ./backup/restore.sh [service-name] [backup-file]
-```
-
-## 📊 Monitoring
-
-### Health Check tất cả services
-
-```bash
-./utils/health-check.sh
-```
-
-### Xem logs
-
-```bash
-# GitLab
-docker logs -f gitlab
-
-# Jenkins
-docker logs -f jenkins
-
-# SonarQube
-docker logs -f sonarqube
-```
-
-## 🛠️ Troubleshooting
-
+docker exec sonarqube-db pg_dump -U sonar sonar > sonar-backup-$(date +%Y%m%d).sql
 ### Service không start
 
 ```bash
@@ -283,64 +225,109 @@ sudo swapon /swapfile
 # Check port usage
 sudo netstat -tulpn | grep [port]
 
-# Change port in docker-compose.yml
-cd /srv/[service]
-nano docker-compose.yml
-docker compose restart
+# ChangQuản lý Services
+
+### Kiểm tra trạng thái
+
+```bash
+docker ps
+docker stats --no-stream
 ```
 
-## 📖 Documentation
+### Restart service
 
-Chi tiết hơn về từng tool:
-- [GitLab Documentation](https://docs.gitlab.com/)
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
-- [SonarQube Documentation](https://docs.sonarqube.org/)
-- [Nexus Documentation](https://help.sonatype.com/repomanager3)
-- [Harbor Documentation](https://goharbor.io/docs/)
+```bash
+cd /srv/gitlab && docker compose restart
+cd /srv/jenkins && docker compose restart
+cd /srv/sonarqube && docker compose restart
+```
 
-## 🤝 Contributing
+### Stop service
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+cd /srv/gitlab && docker compose down
+cd /srv/jenkins && docker compose down
+cd /srv/sonarqube && docker compose down
+```
+
+### Xem logs
+
+```bash
+docker logs -f gitlab
+docker logs -f jenkins
+docker logs -f sonarqube
+```
+
+## 🛠️ Troubleshooting
+
+### Service không start
+
+```bash
+# Check Docker
+sudo systemctl status docker
+
+# Check logs
+docker logs [container-name]
+
+# Check RAM
+free -h
+docker stats
+```
+
+### Port đã được sử dụng
+
+```bash
+# Check port
+sudo netstat -tulpn | grep [port]
+
+# Hoặc dùng ss
+sudo ss -tulpn | grep [port]
+```
+
+### GitLab SSH port 2222
+
+Khi clone repo:
+```bash
+# Sai
+git clone git@server:user/repo.git
+
+# Đúng
+git clone ssh://git@server:2222/user/repo.git
+```
+
+## 🎯 DevOps Workflow
+
+```
+1. Developer viết code
+   ↓
+2. Push lên GitLab
+   ↓
+3. GitLab trigger Jenkins pipeline
+   ↓
+4. Jenkins:
+   - Checkout code
+   - Run tests
+   - SonarQube scan (quality gate)
+   - Build application
+   - Deploy (nếu pass all checks)
+   ↓
+5. Production running
+```
+
+## 📖 Tài liệu thêm
+
+- [QUICKSTART.md](QUICKSTART.md) - Hướng dẫn nhanh
+- [TOOLS.md](TOOLS.md) - Chi tiết về từng tool
+- [GitLab Docs](https://docs.gitlab.com/)
+- [Jenkins Docs](https://www.jenkins.io/doc/)
+- [SonarQube Docs](https://docs.sonarqube.org/)
 
 ## 📝 License
 
 MIT License
 
-## 🎯 Use Cases
-
-### Complete DevOps Pipeline
-
-1. **Source Control**: GitLab
-2. **CI/CD**: Jenkins với GitLab integration
-3. **Code Quality**: SonarQube analysis
-4. **Artifact Storage**: Nexus repository
-5. **Container Registry**: Harbor
-6. **Monitoring**: Prometheus + Grafana
-
-### Example Workflow
-
-```
-Developer Push Code
-    ↓
-GitLab (Git repository)
-    ↓
-Jenkins (CI/CD pipeline)
-    ↓
-SonarQube (Code quality check)
-    ↓
-Build & Test
-    ↓
-Nexus (Store artifacts)
-    ↓
-Build Docker Image
-    ↓
-Harbor (Push Docker image)
-    ↓
-Deploy to Production
-    ↓
-Prometheus + Grafana (Monitor)
-```
-
 ---
-Made with ❤️ for Vibe Coding on Debian 12
 
+**Repository**: https://github.com/kietcaodev/devops-tool
+
+**Made for**:
